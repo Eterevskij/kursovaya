@@ -1,0 +1,109 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #DDE7F3;
+  box-sizing: border-box;
+}
+
+
+
+.container {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+.Header {
+  height: 55px;
+  background: #96B5DB;
+}
+
+.Header .container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+}
+
+.menu {
+  display: flex;
+  justify-content: space-between;
+  width: 450px;
+  padding-right: 70px;
+}
+
+.menu_link, .menu_link_more {
+  color: #fff;
+  text-decoration: none;
+}
+
+.menu_link_more_icon {
+  margin-left: 5px;
+  transform: translateY(3px);
+}
+
+.content {
+  margin-top: 60px;
+}
+
+.table_managment_header img {
+  transform: translateY(3px);
+}
+
+.table_managment {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table_managment_saerch {
+  display: flex;
+  justify-content: space-between;
+  width: 350px;
+  align-items: center;
+}
+
+.table_managment_saerch_input, .table_managment_saerch_by {
+  height: 25px;
+  border: none;
+  width: 150px;
+}
+
+.table_managment_saerch_input {
+  border-radius: 10px;
+}
+
+table {
+  text-align: center;
+  width: 100%;
+}
+
+tr {
+  height: 50px;
+  padding: 0;
+  background: #F0F0F0;
+}
+
+tr:nth-child(even) {
+  background: #ffffff;
+}
+
+th{
+  padding: 0;
+}
+
+tr:first-child {
+  background: #7098C5;
+  color: #fff
+}
+
+.entryActions {
+  display: flex;
+  width: 40px;
+  justify-content: space-between;
+  margin: 0 auto;
+}
