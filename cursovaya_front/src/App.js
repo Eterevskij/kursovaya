@@ -1,14 +1,26 @@
 import './App.css';
+import {useEffect} from 'react'
 
-import Header from './components/Header';
-import Content from './components/Content';
+import HeaderContainer from './components/HeaderContainer';
+import ContentContainer from './components/ContentContainer';
+import { useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
 
-function App() {
+import {getTable} from './redux/tables-reducer';
+
+function App(props) {
+  let location = useLocation().pathname;
+  if(location === '/') location = 'zakaz';
+  const dispatch = useDispatch();
+   useEffect(() => {
+   dispatch(getTable(location))
+   });
+
   return (
     <div>
-        <Header/>
+        <HeaderContainer/>
         <div className="container">
-          <Content />
+          <ContentContainer />
         </div>
     </div>
   );
