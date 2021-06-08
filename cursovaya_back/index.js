@@ -39,6 +39,10 @@ const TABLE_COLUMNS = {
     zakaz:{
         columns:['id' ,'zakazchik', 'mesyac_Arendi', 'reklamnaya_Konstrukciya', 'tip_Reklami', 'table'],
         query: 'SELECT Zakaz.Id AS Id, Zakazchik.Id AS id_zakazchika, Zakazchik.Imya_Zakazchika, Mesyci.Id AS Id_Mesyaca, Mesyci.Nazvanie_Mesyaca, Tip_Reklami.Id AS Id_Tipa, Tip_Reklami.Nazvanie_Tipa, Reklamnaya_Konstrukciya FROM Zakaz INNER JOIN Zakazchik ON Zakaz.Zakazchik = Zakazchik.Id INNER JOIN Mesyci ON Zakaz.Mesyac_Arendi = Mesyci.Id INNER JOIN Tip_Reklami ON Zakaz.Tip_Reklami = Tip_Reklami.Id '
+    },
+    zakazchik:{
+        columns:['id' ,'Imya_Zakazchika', 'Nazvanie_Companii'],
+        query: 'SELECT Zakazchik.Id, Zakazchik.Imya_Zakazchika, Zakazchik.Nazvanie_Companii FROM Zakazchik'
     }
 }
 
@@ -91,7 +95,7 @@ app.get("/", (req, res) => {
         params.query.column = queryKey.filter(key =>{
             return key !== 'table';
         })[0];
-
+        console.log(params)
 
         if (params.withParams) {
 

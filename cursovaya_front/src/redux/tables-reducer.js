@@ -38,7 +38,7 @@ const tablesInfo =  [{
     title:'Заказчик',
     columns:{
         id:{
-            nameInDB: 'id_zakazchika',
+            nameInDB: 'Id',
             columnName: 'id'
         },
         imya_Zakazchika:{
@@ -50,7 +50,23 @@ const tablesInfo =  [{
             columnName: 'Компания'
         },
     }
-}]
+},
+{
+    path:'info_o_Reklamnoj_Konstrukcii',
+    title:'Информация о рекаламной конструкции',
+    columns:{
+        id:{
+            nameInDB: 'Id',
+            columnName: 'id'
+        },
+        imya_Zakazchika:{
+            nameInDB: 'Adres',
+            columnName: 'Имя'
+        },
+    }
+},
+
+]
 
 let initialState = {
     currentTable: {},

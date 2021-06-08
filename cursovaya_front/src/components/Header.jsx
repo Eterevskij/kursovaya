@@ -5,7 +5,7 @@ import {Redirect} from 'react-router'
 
 
 
-const MENU_PUNKTS = [{text:'Заказы', link:"/zakaz"},{text:'Заказчик', link:"/zakazchik"},{text:'Рекламные конструкции', link:"/reklamnieKonstrukcii"}];
+const MENU_PUNKTS = [{text:'Заказы', link:"/zakaz"},{text:'Заказчик', link:"/zakazchik"},{text:'Рекламные конструкции', link:"/info_o_Reklamnoj_Konstrukcii"}];
 
 let Header = (props) => {
 
