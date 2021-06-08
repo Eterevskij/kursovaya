@@ -5,7 +5,9 @@ let Search = (props) => {
             <p>по</p>
             <select className="table_managment_saerch_by">
                 <option></option>
-                <option>Пункт 2</option>
+                {props.columnsNames.map((name)=>{
+                   return <option>{name.columnName}</option>
+                })}
             </select>
         </div>
 )

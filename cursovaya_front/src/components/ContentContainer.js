@@ -1,8 +1,9 @@
 import Content from "./Content";
 import {connect} from "react-redux";
+import {deleteEntity} from '../redux/tables-reducer';
+
 
 let mapStateToProps = (state) => {
-    debugger
     return {
         isPreloading: state.tables.isPreloading,
         tableHeader: state.tables.currentTable,
@@ -12,12 +13,12 @@ let mapStateToProps = (state) => {
 
 let mapDispatchToProps = (dispatch) => {
     return {
-        sendMessage: () => {
-            alert(1)
+        delete: (id, tableName) => {
+            dispatch(deleteEntity(id, tableName))
         }
     }
 }
 
-const ContentContainer = connect(mapStateToProps)(Content);
+const ContentContainer = connect(mapStateToProps, mapDispatchToProps)(Content);
 
 export default ContentContainer;

@@ -4,7 +4,6 @@ import Preloader from '../img/Preloader.gif';
 
 
 let Content = (props) => {
-
     let columnsNames = [];
     let columnsNamesInDB = [];
     
@@ -27,14 +26,12 @@ let Content = (props) => {
     }
 
 
-
     console.log(columnsNamesInDB)
-    debugger;
     return(
         <div className="content">
             {props.isPreloading ? <img src={Preloader} className="preloader" alt="preloader" /> : 
             <>
-            <TableControl />
+            <TableControl columnsNames={columnsNames} />
 
             <table>
                 <tbody>
@@ -50,14 +47,15 @@ let Content = (props) => {
     
                     </tr>
 
-                    {isLoaded && (props.table.map((entity)=>{
+                    {(props.table.map((entity)=>{
+                        console.log(entity)
                         return(<tr>{Object.keys(entity).map((Key,i)=>{
                             {return columnsNamesInDB.map((name)=>{
                                 if(name === Key){
                                     return <td>{entity[Key]}</td>
                                 } 
                             })}
-                        })}<th><EnteryActions/></th></tr>)
+                        })}<th><EnteryActions Id={entity.Id} delete={props.delete}/></th></tr>)
                     }))
                 }
                     

@@ -3,6 +3,7 @@ import {tablesAPI} from '../api';
 const SET_TABLE = 'SET_TABLE';
 const CHANGE_TABLE = 'CHANGE_TABLE';
 const TOGLE_PRELOADER = 'TOGLE_PRELOADER';
+const DELETE_ENTITY = 'DELETE_ENTITY';
 
 
 const tablesInfo =  [{
@@ -10,7 +11,7 @@ const tablesInfo =  [{
     title:'Заказ',
     columns: {
         id: {
-            nameInDB: 'Id_Zakaza',
+            nameInDB: 'Id',
             columnName: 'id'
         },
         customer:{
@@ -57,8 +58,6 @@ let initialState = {
 }
 
 const tablesReducer = (state = initialState, action) => {
-    debugger;
-
     switch(action.type) {
         case CHANGE_TABLE: if(tablesInfo.some((table) => {
 
@@ -70,6 +69,11 @@ const tablesReducer = (state = initialState, action) => {
             case SET_TABLE: 
                 return {...state, table:action.table}
                 
+            case DELETE_ENTITY: 
+                return {...state, table: state.table.filter((entity)=>{
+                    return entity.Id !== action.id;
+                })}
+
             case TOGLE_PRELOADER: 
                 return {...state, isPreloading: action.value}
 
@@ -80,6 +84,7 @@ const tablesReducer = (state = initialState, action) => {
 export const changeTable = (path) =>({ type: CHANGE_TABLE, path })
 export const setTable = table => ({type: SET_TABLE, table})
 export const togglePreloader = (value) =>({ type: TOGLE_PRELOADER, value})
+export const deleteEntityFromTable = (id) =>({ type: DELETE_ENTITY, id})
 
 export const getTable = (path) => (dispatch) => {
     dispatch(togglePreloader(true));
@@ -88,6 +93,14 @@ export const getTable = (path) => (dispatch) => {
         dispatch(changeTable(path));
         dispatch(setTable(response));
         dispatch(togglePreloader(false));
+    });
+}
+
+export const deleteEntity = (Id, Priznaki_Konstrukcii) => (dispatch) => {
+
+    tablesAPI.deleteEntityFromDb(Id, Priznaki_Konstrukcii).then(response => {
+        dispatch(deleteEntityFromTable(Id));
+
     });
 }
 

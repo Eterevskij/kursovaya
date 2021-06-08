@@ -1,10 +1,15 @@
 import edit from '../img/Edit.svg';
 import clean from '../img/Delete.svg';
+import { useLocation } from "react-router-dom";
+
 
 let EnteryActions = (props) => {
-    console.log(123);
+
+    const location = useLocation().pathname.replace('/', '');
+    console.log(location)
+
     return(
-        <span className='entryActions'> <a href=""><img src={edit} alt="" /></a> <a href=""><img src={clean} alt="" /></a> </span>
+        <span className='entryActions'> <a href=""><img src={edit} alt="" /></a> <img onClick={()=>{props.delete(props.Id, location)}} src={clean} alt="" /> </span>
     )
 }
 

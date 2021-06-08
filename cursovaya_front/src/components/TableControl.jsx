@@ -7,7 +7,7 @@ let TableContorl = (props) => {
     <div className="table_managment"> {/* !!! */}
             <h2 className="table_managment_header">Заказы <a href=""><img src={add} alt="" /></a></h2>
             
-            <Search />
+            <Search columnsNames={props.columnsNames}/>
     </div>
 )
 }
