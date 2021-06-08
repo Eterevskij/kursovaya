@@ -10,10 +10,9 @@ import {getTable} from './redux/tables-reducer';
 
 function App(props) {
   let location = useLocation().pathname;
-  if(location === '/') location = 'zakaz';
   const dispatch = useDispatch();
    useEffect(() => {
-   dispatch(getTable(location))
+   dispatch(getTable(location.replace('/', '')))
    });
 
   return (

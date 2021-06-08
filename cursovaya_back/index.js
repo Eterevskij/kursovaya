@@ -29,13 +29,16 @@ let sendEror = (column, type, res) => {
     res.status(400).send({
         error: `Argument ${column} isnt ${type}`
     });
-    //res.end('произошла ошибка');
  }
 
 const TABLE_COLUMNS = {
     info_o_Reklamnoj_Konstrukcii: {
         columns: ['Id', 'Storona', 'Lokacia'],
         query: 'SELECT Info_o_Reklamnoj_Konstrukcii.Id, Storona.Storona, Locacia.Adres FROM Info_o_Reklamnoj_Konstrukcii INNER JOIN Storona ON Info_o_Reklamnoj_Konstrukcii.Storona = Storona.Id INNER JOIN Locacia ON Info_o_Reklamnoj_Konstrukcii.Lokacia = Locacia.Id'
+    },
+    zakaz:{
+        columns:['id' ,'zakazchik', 'mesyac_Arendi', 'reklamnaya_Konstrukciya', 'tip_Reklami', 'table'],
+        query: 'SELECT Zakaz.Id AS Id, Zakazchik.Id AS id_zakazchika, Zakazchik.Imya_Zakazchika, Mesyci.Id AS Id_Mesyaca, Mesyci.Nazvanie_Mesyaca, Tip_Reklami.Id AS Id_Tipa, Tip_Reklami.Nazvanie_Tipa, Reklamnaya_Konstrukciya FROM Zakaz INNER JOIN Zakazchik ON Zakaz.Zakazchik = Zakazchik.Id INNER JOIN Mesyci ON Zakaz.Mesyac_Arendi = Mesyci.Id INNER JOIN Tip_Reklami ON Zakaz.Tip_Reklami = Tip_Reklami.Id '
     }
 }
 
@@ -51,8 +54,6 @@ const testArgumentsSyntax = (string, type) => {
     return type(string);
 } 
 
-let possibleQueries = ['id' ,'zakazchik', 'mesyac_Arendi', 'reklamnaya_Konstrukciya', 'tip_Reklami', 'table'];
-
  
 app.get("/", (req, res) => {
     pool.getConnection((err, connection) => {
@@ -63,34 +64,56 @@ app.get("/", (req, res) => {
         }
 
         let params = {
-            withParams: Object.keys(req.query).length > 0
+            withParams: Object.keys(req.query).length > 1,
+            table: '',
+            query: {
+                column: '',
+                value: '',
+                isString: false
+            }
         }
 
+        let queries = req.query;
+        
+        console.log(queries);
+
+        let queryKey = Object.keys(queries);
+
+        if(!queryKey) {
+            res.status(400).send({
+                error: `Table not found`
+            });
+            return;
+        }
+
+        params.table = queries.table;
+
+        params.query.column = queryKey.filter(key =>{
+            return key !== 'table';
+        })[0];
+
+
         if (params.withParams) {
-            let queries = req.query;
-            console.log((queries));
 
-            let queryKey = Object.keys(queries)[0];
-            console.log(queryKey)
-            if( possibleQueries.includes( queryKey )) {
-                params.query = {};
-                params.query[queryKey] = +queries[queryKey];
-            } else {
-               sendEror(queryKey, 'allowed query', res);
-               return;
+
+            params.query.value = queries[params.query.column];
+
+            if(!TABLE_COLUMNS[queries.table]){
+                sendEror(queries.table, 'table' ,res)
+                return
             }
 
-            if(!isNumber(queries[queryKey])) {
-                sendEror(queryKey, 'number', res);
-                return;
+            if(isNaN(+params.query.value)) {
+                params.query.isString = true
             }
-
         }
 
         console.log('connected as id ' + connection.threadId);
 
+
+        console.log(params)
         connection.query(
-            `SELECT Zakaz.Id AS Id, Zakazchik.Id AS id_zakazchika, Zakazchik.Imya_Zakazchika, Mesyci.Id AS Id_Mesyaca, Mesyci.Nazvanie_Mesyaca, Tip_Reklami.Id AS Id_Tipa, Tip_Reklami.Nazvanie_Tipa, Reklamnaya_Konstrukciya FROM Zakaz INNER JOIN Zakazchik ON Zakaz.Zakazchik = Zakazchik.Id INNER JOIN Mesyci ON Zakaz.Mesyac_Arendi = Mesyci.Id INNER JOIN Tip_Reklami ON Zakaz.Tip_Reklami = Tip_Reklami.Id ${params.withParams ? `where ${Object.keys(params.query)[0]} = ${params.query[Object.keys(params.query)[0]]}` : ""} ORDER BY Id`
+            `${TABLE_COLUMNS[params.table].query} ${params.withParams ? ('WHERE ' + (params.query.column === 'Id' ? (params.table + '.') : '') + params.query.column + (params.query.isString ? ' LIKE ' : '=')  +  (!params.query.isString ? ( params.query.value) : "'%" + params.query.value + "%'") ) : ""} ORDER BY Id`
             , (err, rows) => {
             connection.release();
             console.log(err);

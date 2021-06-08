@@ -6,12 +6,19 @@ const instance = axios.create({
 });
 
 export const tablesAPI = {
-    getTable() {
-        return instance.get()
-            .then(response => {
-                debugger
+    getTable(location, tableName, text) {
+        debugger
+        if(typeof(text) == 'object') {
+            return instance.get(`?table=${location}`).then(response => {
                 return response.data;
             });
+        } else {
+            return instance.get(`?table=${location}&${(tableName + '=' + text)}`).then(response => {
+                return response.data;
+            });
+        }
+       
+
     },
     deleteEntityFromDb(Id, Priznaki_Konstrukcii)  {
         return instance.delete(`?Id=${Id}&tableName=${Priznaki_Konstrukcii}`)
