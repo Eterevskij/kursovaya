@@ -7,7 +7,7 @@ const app = express();
 const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: '#&,e9<[zG-$2@tZ',
     database: 'Reklama'
 })
 
@@ -37,12 +37,14 @@ const TABLE_COLUMNS = {
         query: 'SELECT Info_o_Reklamnoj_Konstrukcii.Id, Storona.Storona, Locacia.Adres FROM Info_o_Reklamnoj_Konstrukcii INNER JOIN Storona ON Info_o_Reklamnoj_Konstrukcii.Storona = Storona.Id INNER JOIN Locacia ON Info_o_Reklamnoj_Konstrukcii.Lokacia = Locacia.Id'
     },
     zakaz:{
-        columns:['id' ,'zakazchik', 'mesyac_Arendi', 'reklamnaya_Konstrukciya', 'tip_Reklami', 'table'],
-        query: 'SELECT Zakaz.Id AS Id, Zakazchik.Id AS id_zakazchika, Zakazchik.Imya_Zakazchika, Mesyci.Id AS Id_Mesyaca, Mesyci.Nazvanie_Mesyaca, Tip_Reklami.Id AS Id_Tipa, Tip_Reklami.Nazvanie_Tipa, Reklamnaya_Konstrukciya FROM Zakaz INNER JOIN Zakazchik ON Zakaz.Zakazchik = Zakazchik.Id INNER JOIN Mesyci ON Zakaz.Mesyac_Arendi = Mesyci.Id INNER JOIN Tip_Reklami ON Zakaz.Tip_Reklami = Tip_Reklami.Id '
+        columns:['id' ,'zakazchik', 'mesyac_Arendi', 'reklamnaya_Konstrukciya', 'tip_Reklami', 'table', 'Imya_Zakazchika'],
+        query: 'SELECT Zakaz.Id AS Id, Zakazchik.Id AS id_zakazchika, Zakazchik.Imya_Zakazchika, Mesyci.Id AS Id_Mesyaca, Mesyci.Nazvanie_Mesyaca, Tip_Reklami.Id AS Id_Tipa, Tip_Reklami.Nazvanie_Tipa, Reklamnaya_Konstrukciya FROM Zakaz INNER JOIN Zakazchik ON Zakaz.Zakazchik = Zakazchik.Id INNER JOIN Mesyci ON Zakaz.Mesyac_Arendi = Mesyci.Id INNER JOIN Tip_Reklami ON Zakaz.Tip_Reklami = Tip_Reklami.Id ',
+        relations: {Imya_Zakazchika: {table: 'Zakazchik', columnName:'Imya_Zakazchika'}, Nazvanie_Mesyaca: {table: 'Mesyaci', columnName:'Nazvanie_Mesyaca'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa'}},
+        name: 'zakaz'
     },
     zakazchik:{
         columns:['id' ,'Imya_Zakazchika', 'Nazvanie_Companii'],
-        query: 'SELECT Zakazchik.Id, Zakazchik.Imya_Zakazchika, Zakazchik.Nazvanie_Companii FROM Zakazchik'
+        query: 'SELECT Zakazchik.Id, Zakazchik.Imya_Zakazchika, Zakazchik.Nazvanie_Companii FROM Zakazchik',
     }
 }
 
@@ -133,7 +135,7 @@ app.get("/", (req, res) => {
 
 app.delete("/", (req, res) => {
 
-    let posibleTables = ['Info_o_Reklamnoj_Konstrukcii', 'Locacia', 'Mesyci', 'Priznaki', 'Priznaki_Konstrukcii', 'Storona', 'Tip_Reklami', 'zakaz', 'Zakazchik'];
+    let posibleTables = ['info_o_Reklamnoj_Konstrukcii', 'locacia', 'mesyci', 'priznaki', 'priznaki_Konstrukcii', 'storona', 'tip_Reklami', 'zakaz', 'zakazchik'];
 
     pool.getConnection((err, connection) => {
         console.log(req.query)
@@ -166,7 +168,7 @@ app.delete("/", (req, res) => {
             }   
 
             if(!posibleTables.includes(tableName)) {
-                sendEror(tableName, 'stable', res);
+                sendEror(tableName, 'table', res);
                 return;
             }
         
@@ -184,6 +186,104 @@ app.delete("/", (req, res) => {
             ('DELETE FROM `' + tableName + '` WHERE `'+ tableName +'`.`' + (tableName === 'Priznaki_Konstrukcii' ? 'id_konstrukcii' : 'Id')  + '` = ' + ID)
             , (err, rows) => {
             connection.release();
+            console.log(err);
+            if(err) res.status('400');
+            res.set('Access-Control-Allow-Origin', '*')
+            res.set('Access-Control-Allow-Methods', 'OPTIONS')
+            res.set('Access-Control-Allow-Headers', 'Content-Type')
+            res.send(rows).status(200);
+        })
+    });
+});
+
+app.put("/", (req, res) => {
+
+    let posibleTables = ['info_o_Reklamnoj_Konstrukcii', 'locacia', 'mesyci', 'priznaki', 'priznaki_Konstrukcii', 'storona', 'tip_Reklami', 'zakaz', 'zakazchik'];
+    let childTable;
+
+    pool.getConnection((err, connection) => {
+        console.log(req.query)
+        if (err) {
+            res.sendStatus(500);
+            return;
+        }
+
+        let params = {
+            withParams: Object.keys(req.query).length > 2,
+            table: '',
+            column: '',
+            value: '',
+            Id: 0,
+            childId: 0
+        }
+
+        let queries = req.query;
+
+        if(params.withParams) {
+
+            params.table = TABLE_COLUMNS?.[queries.table];
+
+            if(!params.table) {
+                res.status(400).send({
+                    error: `Table not found`
+                });
+                return;
+            }
+
+            let queryKey = Object.keys(queries);
+
+            queryKey.forEach(key => {
+                if(params.table.columns.includes(key) & key != 'table')
+                    console.log('!!!!' ,key)
+                    params.column = key
+            })
+
+            let Id = queries?.Id;
+
+            if(!Id) {
+                res.status(400).send({
+                    error: `Id not found`
+                });
+                return; 
+            }
+
+            params.Id = Id;
+
+            if(params.column === '') {
+                res.status(400).send({
+                    error: `Column not found`
+                });
+                return;
+            }
+            params.value = queries[params.column];
+
+            console.log(params)
+
+            childTable = params.table.relations[params.column];
+
+            connection.query(
+                ("SELECT " + childTable.table + ".Id, " +  childTable.table + "." + childTable.columnName +  ' FROM ' + childTable.table + ' WHERE ' + childTable.table + '.' + childTable.columnName +  ' = ' + params.value)
+                , (err, rows) => {
+                    params.childId = (rows[0].Id);
+                     connection.release();
+            })
+
+        } else {
+            res.status(400).send({
+                error: `Not enough arguments`
+            });
+            return
+        }
+
+        console.log(params)
+
+        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', params.table.name);
+
+        connection.query(("SELECT " + childTable.table + ".Id, " +  childTable.table + "." + childTable.columnName +  ' FROM ' + childTable.table + ' WHERE ' + childTable.table + '.' + childTable.columnName +  ' = ' + params.value))
+
+        connection.query(
+            ('UPDATE `' + params.table.name + '` SET `' + params.column + "` = " + params.value + ' WHERE `' + params.table.name + '`.`Id` = ' + params.childId)
+            , (err, rows) => {
             console.log(err);
             if(err) res.status('400');
             res.set('Access-Control-Allow-Origin', '*')

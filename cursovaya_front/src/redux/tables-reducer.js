@@ -59,9 +59,13 @@ const tablesInfo =  [{
             nameInDB: 'Id',
             columnName: 'id'
         },
-        imya_Zakazchika:{
+        storona:{
+            nameInDB: 'Storona',
+            columnName: 'Сторона'
+        },        
+        adres:{
             nameInDB: 'Adres',
-            columnName: 'Имя'
+            columnName: 'Адрес'
         },
     }
 },
