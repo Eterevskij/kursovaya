@@ -7,7 +7,7 @@ const app = express();
 const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: '#&,e9<[zG-$2@tZ',
+    password: '',
     database: 'Reklama'
 })
 
@@ -39,7 +39,7 @@ const TABLE_COLUMNS = {
     zakaz:{
         columns:['id' ,'zakazchik', 'mesyac_Arendi', 'reklamnaya_Konstrukciya', 'tip_Reklami', 'table', 'Imya_Zakazchika'],
         query: 'SELECT Zakaz.Id AS Id, Zakazchik.Id AS id_zakazchika, Zakazchik.Imya_Zakazchika, Mesyci.Id AS Id_Mesyaca, Mesyci.Nazvanie_Mesyaca, Tip_Reklami.Id AS Id_Tipa, Tip_Reklami.Nazvanie_Tipa, Reklamnaya_Konstrukciya FROM Zakaz INNER JOIN Zakazchik ON Zakaz.Zakazchik = Zakazchik.Id INNER JOIN Mesyci ON Zakaz.Mesyac_Arendi = Mesyci.Id INNER JOIN Tip_Reklami ON Zakaz.Tip_Reklami = Tip_Reklami.Id ',
-        relations: {Imya_Zakazchika: {table: 'Zakazchik', columnName:'Imya_Zakazchika'}, Nazvanie_Mesyaca: {table: 'Mesyaci', columnName:'Nazvanie_Mesyaca'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa'}},
+        relations: {Imya_Zakazchika: {table: 'Zakazchik', columnName: 'Imya_Zakazchika', nameInParent: 'Zakazchik'}, Nazvanie_Mesyaca: {table: 'Mesyaci', columnName:'Nazvanie_Mesyaca'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa'}},
         name: 'zakaz'
     },
     zakazchik:{
@@ -232,11 +232,14 @@ app.put("/", (req, res) => {
 
             let queryKey = Object.keys(queries);
 
+            console.log(params.table.columns)
+
             queryKey.forEach(key => {
-                if(params.table.columns.includes(key) & key != 'table')
-                    console.log('!!!!' ,key)
+                console.log('!!!!' ,key)
+                if(params.table.columns.includes(key) && key != 'table' )
                     params.column = key
             })
+
 
             let Id = queries?.Id;
 
@@ -249,6 +252,9 @@ app.put("/", (req, res) => {
 
             params.Id = Id;
 
+            console.log(params)
+
+
             if(params.column === '') {
                 res.status(400).send({
                     error: `Column not found`
@@ -257,16 +263,7 @@ app.put("/", (req, res) => {
             }
             params.value = queries[params.column];
 
-            console.log(params)
-
             childTable = params.table.relations[params.column];
-
-            connection.query(
-                ("SELECT " + childTable.table + ".Id, " +  childTable.table + "." + childTable.columnName +  ' FROM ' + childTable.table + ' WHERE ' + childTable.table + '.' + childTable.columnName +  ' = ' + params.value)
-                , (err, rows) => {
-                    params.childId = (rows[0].Id);
-                     connection.release();
-            })
 
         } else {
             res.status(400).send({
@@ -275,14 +272,8 @@ app.put("/", (req, res) => {
             return
         }
 
-        console.log(params)
-
-        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', params.table.name);
-
-        connection.query(("SELECT " + childTable.table + ".Id, " +  childTable.table + "." + childTable.columnName +  ' FROM ' + childTable.table + ' WHERE ' + childTable.table + '.' + childTable.columnName +  ' = ' + params.value))
-
         connection.query(
-            ('UPDATE `' + params.table.name + '` SET `' + params.column + "` = " + params.value + ' WHERE `' + params.table.name + '`.`Id` = ' + params.childId)
+            ('UPDATE `' + params.table.name + '` SET `' + params.table.relations[params.column].nameInParent + "` = " + "(SELECT " + childTable.table + '.Id FROM '+ childTable.table + ' WHERE ' + childTable.table + '.' + childTable.columnName +  " = '" + params.value + "')" + ' WHERE `' + params.table.name + '`.`Id` = ' + params.Id)
             , (err, rows) => {
             console.log(err);
             if(err) res.status('400');
