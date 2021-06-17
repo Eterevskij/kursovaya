@@ -5,7 +5,9 @@ const CHANGE_TABLE = 'CHANGE_TABLE';
 const TOGLE_PRELOADER = 'TOGLE_PRELOADER';
 const DELETE_ENTITY = 'DELETE_ENTITY';
 const SET_SEARCH = 'SET_SEARCH';
-
+const EDIT_FIELD = 'EDIT_FIELD'
+const SET_EDIT_MODE = 'SET_EDIT_MODE'
+const SET_EDIT_ENTITY = 'SET_EDIT_ENTITY'
 
 const tablesInfo =  [{
     path:'zakaz',
@@ -13,23 +15,28 @@ const tablesInfo =  [{
     columns: {
         id: {
             nameInDB: 'Id',
-            columnName: 'id'
+            columnName: 'id',
+            editType: 'no'
         },
         customer:{
             nameInDB: 'Imya_Zakazchika',
-            columnName: 'Заказчик'
+            columnName: 'Заказчик',
+            editType: 'select'
         },
         month:{
             nameInDB: 'Nazvanie_Mesyaca',
-            columnName: 'Месяц'
+            columnName: 'Месяц',
+            editType: 'select'
         },
         type:{
             nameInDB: 'Nazvanie_Tipa',
-            columnName: 'Тип'
+            columnName: 'Тип',
+            editType: 'select'
         },
         advertisingStructure:{
             nameInDB: 'Reklamnaya_Konstrukciya',
-            columnName: 'Рекламная конструкция'
+            columnName: 'Рекламная конструкция',
+            editType: 'select'
         },
     }
 },
@@ -39,15 +46,18 @@ const tablesInfo =  [{
     columns:{
         id:{
             nameInDB: 'Id',
-            columnName: 'id'
+            columnName: 'id',
+            editType: 'no'
         },
         imya_Zakazchika:{
             nameInDB: 'Imya_Zakazchika',
-            columnName: 'Имя'
+            columnName: 'Имя',
+            editType: 'text'
         },
         nazvanie_kompanii:{
             nameInDB: 'Nazvanie_Companii',
-            columnName: 'Компания'
+            columnName: 'Компания',
+            editType: 'text'
         },
     }
 },
@@ -57,15 +67,23 @@ const tablesInfo =  [{
     columns:{
         id:{
             nameInDB: 'Id',
-            columnName: 'id'
+            columnName: 'id',
+            editType: 'no'
         },
         storona:{
             nameInDB: 'Storona',
-            columnName: 'Сторона'
+            columnName: 'Сторона',
+            editType: 'select'
         },        
         adres:{
             nameInDB: 'Adres',
-            columnName: 'Адрес'
+            columnName: 'Адрес',
+            editType: 'text'
+        },
+        cena:{
+            nameInDB: 'Cena',
+            columnName: 'Цена',
+            editType: 'text'
         },
     }
 },
@@ -77,7 +95,9 @@ let initialState = {
     table:{},
     isPreloading : true,
     searchText: '',
-    columnName: 0
+    columnName: 0,
+    editMode: false,
+    editEntity: 0
 }
 
 const tablesReducer = (state = initialState, action) => {
@@ -97,8 +117,26 @@ const tablesReducer = (state = initialState, action) => {
                     return entity.Id !== action.id;
                 })}
 
+            case EDIT_FIELD: 
+                return {...state, table: state.table.map((entity)=>{
+                    if(entity.Id === action.id) {
+                        return {...state, table: state.table}
+                    } else {
+                        return {...state, table: state.table}
+                    }
+
+                })}
+
             case TOGLE_PRELOADER: 
                 return {...state, isPreloading: action.value}
+            
+            case SET_EDIT_MODE : {
+                return{...state, editMode: action.value, editEntity: action.Id}
+            }
+
+            case SET_EDIT_ENTITY : {
+                return{...state, editEntity: action.Id}
+            }
 
             case SET_SEARCH: 
                 return {...state, searchText: action.text, columnName: action.column}
@@ -109,12 +147,15 @@ const tablesReducer = (state = initialState, action) => {
 
 export const changeTable = (path) =>({ type: CHANGE_TABLE, path })
 export const setTable = table => ({type: SET_TABLE, table})
+export const setEditMode = (value, Id, location) => ({type: SET_EDIT_MODE, value, Id, location})
 export const togglePreloader = (value) =>({ type: TOGLE_PRELOADER, value})
 export const deleteEntityFromTable = (id) =>({ type: DELETE_ENTITY, id})
+export const editFieldInDb = (id, field, value) =>({ type: EDIT_FIELD, id, field, value})
 export const setSearch = (column, text) => ({type: SET_SEARCH, column, text})
+export const setEditEntity = Id => ({type: SET_EDIT_ENTITY, Id})
 
 export const getTable = (path, column = null, text = null, optionNum = null) => (dispatch) => {
-    debugger
+
     if(typeof(column) !== "null" || "object"){
         dispatch(setSearch (optionNum, text));
     } 
@@ -130,6 +171,15 @@ export const deleteEntity = (Id, Priznaki_Konstrukcii) => (dispatch) => {
 
     tablesAPI.deleteEntityFromDb(Id, Priznaki_Konstrukcii).then(response => {
         dispatch(deleteEntityFromTable(Id));
+    });
+}
+
+export const editField = (location, Id, field, value) => (dispatch) => {
+    dispatch(setEditEntity(Id));
+    dispatch(setEditMode(true));
+    tablesAPI.editFieldInDb(location, Id, field, value).then(response => {
+        dispatch(editFieldInDb(Id, field, value));
+        dispatch(setEditMode(false));
     });
 }
 

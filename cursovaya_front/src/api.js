@@ -1,13 +1,12 @@
 import * as axios from "axios";
 
 const instance = axios.create({
-    // withCredentials: true,
     baseURL: 'http://localhost:3001/',
 });
 
 export const tablesAPI = {
     getTable(location, tableName, text) {
-        debugger
+
         if(typeof(text) == 'object') {
             return instance.get(`?table=${location}`).then(response => {
                 return response.data;
@@ -22,6 +21,15 @@ export const tablesAPI = {
     },
     deleteEntityFromDb(Id, Priznaki_Konstrukcii)  {
         return instance.delete(`?Id=${Id}&tableName=${Priznaki_Konstrukcii}`)
+            .then(response => {
+                if (response.status !== 200) return { success: false};
+                return { success: true}; 
+            });
+    },
+
+
+    editEntityInDb(location, Id, field, value)  {
+        return instance.put(`?table=${location}&${field}=${value.replace(' ', '%20')}&Id=${Id}`)
             .then(response => {
                 if (response.status !== 200) return { success: false};
                 return { success: true}; 

@@ -14,14 +14,14 @@ let Search = (props) => {
 
     let changeSearch = ()=>{
         
-        debugger
+ 
     let inputText = textInput.current.value;
     
     if(inputText === "") {props.search(location); return};
-    debugger
+
     let i = -1;
         for (let key in props.options) {
-                debugger
+       
                 i++;
                 if(props.options[key].columnName === selectInput.current.value || selectInput.current.value === 'none'){
                     let columnName = props.options[key].nameInDB;

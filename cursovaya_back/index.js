@@ -34,17 +34,18 @@ let sendEror = (column, type, res) => {
 const TABLE_COLUMNS = {
     info_o_Reklamnoj_Konstrukcii: {
         columns: ['Id', 'Storona', 'Lokacia'],
-        query: 'SELECT Info_o_Reklamnoj_Konstrukcii.Id, Storona.Storona, Locacia.Adres FROM Info_o_Reklamnoj_Konstrukcii INNER JOIN Storona ON Info_o_Reklamnoj_Konstrukcii.Storona = Storona.Id INNER JOIN Locacia ON Info_o_Reklamnoj_Konstrukcii.Lokacia = Locacia.Id'
+        query: 'SELECT Info_o_Reklamnoj_Konstrukcii.Id, Storona.Storona, Locacia.Adres, Info_o_Reklamnoj_Konstrukcii.Cena FROM Info_o_Reklamnoj_Konstrukcii INNER JOIN Storona ON Info_o_Reklamnoj_Konstrukcii.Storona = Storona.Id INNER JOIN Locacia ON Info_o_Reklamnoj_Konstrukcii.Lokacia = Locacia.Id '
     },
     zakaz:{
         columns:['id' ,'zakazchik', 'mesyac_Arendi', 'reklamnaya_Konstrukciya', 'tip_Reklami', 'table', 'Imya_Zakazchika'],
         query: 'SELECT Zakaz.Id AS Id, Zakazchik.Id AS id_zakazchika, Zakazchik.Imya_Zakazchika, Mesyci.Id AS Id_Mesyaca, Mesyci.Nazvanie_Mesyaca, Tip_Reklami.Id AS Id_Tipa, Tip_Reklami.Nazvanie_Tipa, Reklamnaya_Konstrukciya FROM Zakaz INNER JOIN Zakazchik ON Zakaz.Zakazchik = Zakazchik.Id INNER JOIN Mesyci ON Zakaz.Mesyac_Arendi = Mesyci.Id INNER JOIN Tip_Reklami ON Zakaz.Tip_Reklami = Tip_Reklami.Id ',
-        relations: {Imya_Zakazchika: {table: 'Zakazchik', columnName: 'Imya_Zakazchika', nameInParent: 'Zakazchik'}, Nazvanie_Mesyaca: {table: 'Mesyaci', columnName:'Nazvanie_Mesyaca'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa'}},
+        relations: {Imya_Zakazchika: {table: 'Zakazchik', columnName: 'Imya_Zakazchika', nameInParent: 'Zakazchik'}, Nazvanie_Mesyaca: {table: 'Mesyaci', columnName:'Nazvanie_Mesyaca', nameInParent: 'Mesyac_Arendi'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa', nameInParent: 'Tip_Reklami'}},
         name: 'zakaz'
     },
     zakazchik:{
         columns:['id' ,'Imya_Zakazchika', 'Nazvanie_Companii'],
         query: 'SELECT Zakazchik.Id, Zakazchik.Imya_Zakazchika, Zakazchik.Nazvanie_Companii FROM Zakazchik',
+        name: 'zakazchik'
     }
 }
 
@@ -62,6 +63,78 @@ const testArgumentsSyntax = (string, type) => {
 
  
 app.get("/", (req, res) => {
+    pool.getConnection((err, connection) => {
+
+        if (err) {
+            res.sendStatus(500);
+            return;
+        }
+
+        let params = {
+            withParams: Object.keys(req.query).length > 1,
+            table: '',
+            query: {
+                column: '',
+                value: '',
+                isString: false
+            }
+        }
+
+        let queries = req.query;
+        
+        console.log(queries);
+
+        let queryKey = Object.keys(queries);
+
+        if(!queryKey) {
+            res.status(400).send({
+                error: `Table not found`
+            });
+            return;
+        }
+
+        params.table = queries.table;
+
+        params.query.column = queryKey.filter(key =>{
+            return key !== 'table';
+        })[0];
+        console.log(params)
+
+        if (params.withParams) {
+
+
+            params.query.value = queries[params.query.column];
+
+            if(!TABLE_COLUMNS[queries.table]){
+                sendEror(queries.table, 'table' ,res)
+                return
+            }
+
+            if(isNaN(+params.query.value)) {
+                params.query.isString = true
+            }
+        }
+
+        console.log('connected as id ' + connection.threadId);
+
+
+        console.log(params)
+        connection.query(
+            `${TABLE_COLUMNS[params.table].query} ${params.withParams ? ('WHERE ' + (params.query.column === 'Id' ? (params.table + '.') : '') + params.query.column + (params.query.isString ? ' LIKE ' : '=')  +  (!params.query.isString ? ( params.query.value) : "'%" + params.query.value + "%'") ) : ""} ORDER BY Id`
+            , (err, rows) => {
+            connection.release();
+            console.log(err);
+            if(err) res.status('400');
+            res.set('Access-Control-Allow-Origin', '*')
+            res.header('Access-Control-Allow-Credentials', true);
+            res.set('Access-Control-Allow-Methods', 'GET')
+            res.set('Access-Control-Allow-Headers', 'Content-Type')
+            res.send(rows).status(200);
+        })
+    });
+});
+
+app.get("/select", (req, res) => {
     pool.getConnection((err, connection) => {
 
         if (err) {
@@ -198,7 +271,6 @@ app.delete("/", (req, res) => {
 
 app.put("/", (req, res) => {
 
-    let posibleTables = ['info_o_Reklamnoj_Konstrukcii', 'locacia', 'mesyci', 'priznaki', 'priznaki_Konstrukcii', 'storona', 'tip_Reklami', 'zakaz', 'zakazchik'];
     let childTable;
 
     pool.getConnection((err, connection) => {

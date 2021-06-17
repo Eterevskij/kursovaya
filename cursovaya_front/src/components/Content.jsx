@@ -1,10 +1,9 @@
 import TableControl from './TableControl';
-import EnteryActions from './EnteryActions';
 import Preloader from '../img/Preloader.gif';
+import Table from './table/Table'
 
 
 let Content = (props) => {
-    debugger
 
     console.log(props)
 
@@ -21,49 +20,18 @@ let Content = (props) => {
                 props.tableHeader.columns[Key]
               )
           })
-
-          columnsNamesInDB = Object.keys(props.tableHeader.columns).map((Key,i)=>{
-            return (
-                props.tableHeader.columns[Key].nameInDB
-              )
-          })
     }
 
 
-    console.log(columnsNamesInDB)
     return(
         <div className="content">
             {props.isPreloading ? <img src={Preloader} className="preloader" alt="preloader" /> : 
             <>
             <TableControl options={props.tableHeader} columnsNames={columnsNames} find={props.find} columnName={props.columnName} searchText={props.searchText}/>
 
-            <table>
-                <tbody>
-                    <tr>
-                        
-    
-                    {columnsNames.map((column)=>{
-                        return(
-                            <th>{column.columnName}</th>
-                    )
-                    })}
-                    <th></th>
-    
-                    </tr>
-
-                    {(props.table.map((entity)=>{
-                        return(<tr>{Object.keys(entity).map((Key,i)=>{
-                            {return columnsNamesInDB.map((name)=>{
-                                if(name === Key){
-                                    return <td>{entity[Key]}</td>
-                                } 
-                            })}
-                        })}<th><EnteryActions Id={entity.Id} delete={props.delete}/></th></tr>)
-                    }))
-                }
-                    
-                </tbody>
-            </table></>}
+            <Table columnsNames={columnsNames} tableHeader={props.tableHeader} columnsNamesInDB={columnsNamesInDB} table={props.table} setEditMode={props.setEditMode} editMode={props.editMode} delete={props.delete} editEntity={props.editEntity}/>
+            
+            </>}
         
         
       </div>
