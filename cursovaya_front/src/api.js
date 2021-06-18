@@ -34,5 +34,13 @@ export const tablesAPI = {
                 if (response.status !== 200) return { success: false};
                 return { success: true}; 
             });
+    },
+
+
+    getSelect(table, field)  {
+        return instance.get(`select?table=${table}&field=${field}`)
+            .then(response => {
+                return response.data;
+            });
     }
 }

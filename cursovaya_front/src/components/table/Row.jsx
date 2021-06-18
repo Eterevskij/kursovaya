@@ -4,13 +4,13 @@ import StaticRow from './StaticRow'
 
 let Row = (props) => {
 
-    debugger
 
     let {entity} = props
 
     let columnsNamesInDB = Object.keys(props.tableHeader.columns).map((Key,i)=>{
         return (
-            props.tableHeader.columns[Key].nameInDB
+            {text: props.tableHeader.columns[Key].nameInDB,
+            type: props.tableHeader.columns[Key].editType}
           )
       })
 
@@ -18,9 +18,8 @@ let Row = (props) => {
   
         return(<tr>{Object.keys(entity).map((Key,i)=>{
             if(props.editMode && entity.Id == props.editEntity) {
-                <EditigRow />
+                return <EditigRow Key={Key} editField={props.editField} selects={props.selects} tableHeader={props.tableHeader} entity={entity} columnsNamesInDB={columnsNamesInDB}/>
             } else {
-                debugger
                 return <StaticRow Key={Key} entity={entity} columnsNamesInDB={columnsNamesInDB}/>
             }
         })}<th><EnteryActions Id={entity.Id} delete={props.delete} setEditMode={props.setEditMode}/></th></tr>)

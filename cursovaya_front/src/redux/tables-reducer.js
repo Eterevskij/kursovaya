@@ -8,6 +8,7 @@ const SET_SEARCH = 'SET_SEARCH';
 const EDIT_FIELD = 'EDIT_FIELD'
 const SET_EDIT_MODE = 'SET_EDIT_MODE'
 const SET_EDIT_ENTITY = 'SET_EDIT_ENTITY'
+const SET_SELECT = 'SET_SELECT'
 
 const tablesInfo =  [{
     path:'zakaz',
@@ -97,7 +98,8 @@ let initialState = {
     searchText: '',
     columnName: 0,
     editMode: false,
-    editEntity: 0
+    editEntity: 0,
+    selects: {}
 }
 
 const tablesReducer = (state = initialState, action) => {
@@ -141,6 +143,12 @@ const tablesReducer = (state = initialState, action) => {
             case SET_SEARCH: 
                 return {...state, searchText: action.text, columnName: action.column}
 
+            case SET_SELECT: 
+            return {
+                ...state,
+                selects: {...state.selects, [action.field]: action.options}
+            };
+
         default: return state;
     }
 }
@@ -153,16 +161,31 @@ export const deleteEntityFromTable = (id) =>({ type: DELETE_ENTITY, id})
 export const editFieldInDb = (id, field, value) =>({ type: EDIT_FIELD, id, field, value})
 export const setSearch = (column, text) => ({type: SET_SEARCH, column, text})
 export const setEditEntity = Id => ({type: SET_EDIT_ENTITY, Id})
+export const setSelect = (field, options) => ({type: SET_SELECT, field, options})
 
 export const getTable = (path, column = null, text = null, optionNum = null) => (dispatch) => {
 
     if(typeof(column) !== "null" || "object"){
         dispatch(setSearch (optionNum, text));
     } 
+
     dispatch(togglePreloader(true));
     tablesAPI.getTable(path, column, text).then(response => {
+        
         dispatch(changeTable(path));
         dispatch(setTable(response));
+
+        for (let table in tablesInfo) {
+            if(tablesInfo[table].path === path) {
+                let columns = tablesInfo[table].columns;
+                for(let i in columns ) {
+                    if(columns[i].editType === 'select') {
+                        dispatch(setSelectOptions(path, columns[i].nameInDB));
+                    }
+                }
+            }
+        } 
+ 
         dispatch(togglePreloader(false));
     });
 }
@@ -174,10 +197,17 @@ export const deleteEntity = (Id, Priznaki_Konstrukcii) => (dispatch) => {
     });
 }
 
+export const setSelectOptions = (table, field) => (dispatch) => {
+
+    tablesAPI.getSelect(table, field).then(response => {
+        dispatch(setSelect(field,  response ));
+    });
+}
+
 export const editField = (location, Id, field, value) => (dispatch) => {
     dispatch(setEditEntity(Id));
     dispatch(setEditMode(true));
-    tablesAPI.editFieldInDb(location, Id, field, value).then(response => {
+    tablesAPI.editEntityInDb(location, Id, field, value).then(response => {
         dispatch(editFieldInDb(Id, field, value));
         dispatch(setEditMode(false));
     });

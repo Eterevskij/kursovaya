@@ -4,7 +4,6 @@ import Row from './Row';
 
 let Table = (props) => {
 if(typeof(props) !=='undefined'){
-debugger
 
   return(
         <table>
@@ -12,7 +11,7 @@ debugger
                 <TableHeader columnsNames={props.columnsNames}/>
 
                 {props.table.map((entity)=>{
-                    return <Row entity={entity} tableHeader={props.tableHeader} editMode={props.editMode} editEntity={props.editEntity} delete={props.delete} setEditMode={props.setEditMode}/>
+                    return <Row editField={props.editField} setSelectOptions={props.setSelectOptions} selects={props.selects} entity={entity} tableHeader={props.tableHeader} editMode={props.editMode} editEntity={props.editEntity} delete={props.delete} setEditMode={props.setEditMode}/>
                 })
             }
                 

@@ -1,6 +1,6 @@
 import Content from "./Content";
 import {connect} from "react-redux";
-import {deleteEntity, getTable, editField, setEditMode} from '../redux/tables-reducer';
+import {deleteEntity, getTable, editField, setEditMode, setSelectOptions} from '../redux/tables-reducer';
 
 
 let mapStateToProps = (state) => {
@@ -12,7 +12,8 @@ let mapStateToProps = (state) => {
         searchText: state.tables.searchText,
         columnName: state.tables.columnName,
         editMode: state.tables.editMode,
-        editEntity: state.tables.editEntity
+        editEntity: state.tables.editEntity,
+        selects: state.tables.selects
     }
 }
 
@@ -29,6 +30,9 @@ let mapDispatchToProps = (dispatch) => {
         },
         setEditMode: (value, Id) => {
             dispatch(setEditMode(value, Id))
+        },
+        setSelectOptions: (table, field) => {
+            dispatch(setSelectOptions(table, field))
         }
     }
 }

@@ -29,7 +29,7 @@ let Content = (props) => {
             <>
             <TableControl options={props.tableHeader} columnsNames={columnsNames} find={props.find} columnName={props.columnName} searchText={props.searchText}/>
 
-            <Table columnsNames={columnsNames} tableHeader={props.tableHeader} columnsNamesInDB={columnsNamesInDB} table={props.table} setEditMode={props.setEditMode} editMode={props.editMode} delete={props.delete} editEntity={props.editEntity}/>
+            <Table selects={props.selects} setSelectOptions={props.setSelectOptions} columnsNames={columnsNames} tableHeader={props.tableHeader} columnsNamesInDB={columnsNamesInDB} table={props.table} setEditMode={props.setEditMode} editMode={props.editMode} delete={props.delete} editField={props.editField} editEntity={props.editEntity}/>
             
             </>}
         

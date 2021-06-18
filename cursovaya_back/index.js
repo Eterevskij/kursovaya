@@ -33,13 +33,15 @@ let sendEror = (column, type, res) => {
 
 const TABLE_COLUMNS = {
     info_o_Reklamnoj_Konstrukcii: {
-        columns: ['Id', 'Storona', 'Lokacia'],
-        query: 'SELECT Info_o_Reklamnoj_Konstrukcii.Id, Storona.Storona, Locacia.Adres, Info_o_Reklamnoj_Konstrukcii.Cena FROM Info_o_Reklamnoj_Konstrukcii INNER JOIN Storona ON Info_o_Reklamnoj_Konstrukcii.Storona = Storona.Id INNER JOIN Locacia ON Info_o_Reklamnoj_Konstrukcii.Lokacia = Locacia.Id '
+        columns: ['Id', 'Storona', 'Lokacia', 'Cena'],
+        query: 'SELECT Info_o_Reklamnoj_Konstrukcii.Id, Storona.Storona, Locacia.Adres, Info_o_Reklamnoj_Konstrukcii.Cena FROM Info_o_Reklamnoj_Konstrukcii INNER JOIN Storona ON Info_o_Reklamnoj_Konstrukcii.Storona = Storona.Id INNER JOIN Locacia ON Info_o_Reklamnoj_Konstrukcii.Lokacia = Locacia.Id ',
+        relations: {Storona: {table: 'Storona', columnName: 'Storona', nameInParent: 'Storona'}, Adres: {table: 'Lokacia', columnName:'Adres', nameInParent: 'Lokacia'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa', nameInParent: 'Tip_Reklami'}, Reklamnaya_Konstrukciya: {table: 'Info_o_Reklamnoj_Konstrukcii', columnName:'Id', nameInParent: 'Reklamnaya_Konstrukciya'}},
+        name: 'info_o_Reklamnoj_Konstrukcii'
     },
     zakaz:{
-        columns:['id' ,'zakazchik', 'mesyac_Arendi', 'reklamnaya_Konstrukciya', 'tip_Reklami', 'table', 'Imya_Zakazchika'],
+        columns:['id' ,'Zakazchik', 'Mesyac_Arendi', 'Nazvanie_Mesyaca', 'Reklamnaya_Konstrukciya', 'Tip_Reklami', 'Nazvanie_Tipa', 'table', 'Imya_Zakazchika'],
         query: 'SELECT Zakaz.Id AS Id, Zakazchik.Id AS id_zakazchika, Zakazchik.Imya_Zakazchika, Mesyci.Id AS Id_Mesyaca, Mesyci.Nazvanie_Mesyaca, Tip_Reklami.Id AS Id_Tipa, Tip_Reklami.Nazvanie_Tipa, Reklamnaya_Konstrukciya FROM Zakaz INNER JOIN Zakazchik ON Zakaz.Zakazchik = Zakazchik.Id INNER JOIN Mesyci ON Zakaz.Mesyac_Arendi = Mesyci.Id INNER JOIN Tip_Reklami ON Zakaz.Tip_Reklami = Tip_Reklami.Id ',
-        relations: {Imya_Zakazchika: {table: 'Zakazchik', columnName: 'Imya_Zakazchika', nameInParent: 'Zakazchik'}, Nazvanie_Mesyaca: {table: 'Mesyaci', columnName:'Nazvanie_Mesyaca', nameInParent: 'Mesyac_Arendi'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa', nameInParent: 'Tip_Reklami'}},
+        relations: {Imya_Zakazchika: {table: 'Zakazchik', columnName: 'Imya_Zakazchika', nameInParent: 'Zakazchik'}, Nazvanie_Mesyaca: {table: 'Mesyci', columnName:'Nazvanie_Mesyaca', nameInParent: 'Mesyac_Arendi'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa', nameInParent: 'Tip_Reklami'}, Reklamnaya_Konstrukciya: {table: 'Info_o_Reklamnoj_Konstrukcii', columnName:'Id', nameInParent: 'Reklamnaya_Konstrukciya'}},
         name: 'zakaz'
     },
     zakazchik:{
@@ -145,11 +147,7 @@ app.get("/select", (req, res) => {
         let params = {
             withParams: Object.keys(req.query).length > 1,
             table: '',
-            query: {
-                column: '',
-                value: '',
-                isString: false
-            }
+            field:''
         }
 
         let queries = req.query;
@@ -165,34 +163,18 @@ app.get("/select", (req, res) => {
             return;
         }
 
-        params.table = queries.table;
+        params.table = TABLE_COLUMNS[queries.table];
 
-        params.query.column = queryKey.filter(key =>{
-            return key !== 'table';
-        })[0];
-        console.log(params)
+        let field = queries?.field;
 
-        if (params.withParams) {
-
-
-            params.query.value = queries[params.query.column];
-
-            if(!TABLE_COLUMNS[queries.table]){
-                sendEror(queries.table, 'table' ,res)
-                return
-            }
-
-            if(isNaN(+params.query.value)) {
-                params.query.isString = true
-            }
-        }
+        params.field = params.table.relations[field];
 
         console.log('connected as id ' + connection.threadId);
 
+        console.log('!!!',field)
 
-        console.log(params)
         connection.query(
-            `${TABLE_COLUMNS[params.table].query} ${params.withParams ? ('WHERE ' + (params.query.column === 'Id' ? (params.table + '.') : '') + params.query.column + (params.query.isString ? ' LIKE ' : '=')  +  (!params.query.isString ? ( params.query.value) : "'%" + params.query.value + "%'") ) : ""} ORDER BY Id`
+            `SELECT ${params.field.table}.${params.field.columnName} FROM ${params.field.table}`
             , (err, rows) => {
             connection.release();
             console.log(err);
@@ -286,7 +268,8 @@ app.put("/", (req, res) => {
             column: '',
             value: '',
             Id: 0,
-            childId: 0
+            childId: 0,
+            related: false
         }
 
         let queries = req.query;
@@ -307,11 +290,14 @@ app.put("/", (req, res) => {
             console.log(params.table.columns)
 
             queryKey.forEach(key => {
-                console.log('!!!!' ,key)
-                if(params.table.columns.includes(key) && key != 'table' )
+                console.log('!!!!' ,params.table.columns)
+
+                if(params.table.columns.includes(key) && key != 'table' && key != 'Id')
+                    
                     params.column = key
             })
 
+            console.log(params.column)
 
             let Id = queries?.Id;
 
@@ -326,6 +312,7 @@ app.put("/", (req, res) => {
 
             console.log(params)
 
+            console.log('Тут',queries)
 
             if(params.column === '') {
                 res.status(400).send({
@@ -335,7 +322,17 @@ app.put("/", (req, res) => {
             }
             params.value = queries[params.column];
 
-            childTable = params.table.relations[params.column];
+            try{
+                childTable = params.table.relations[params.column];
+            } catch(err) {
+                console.log(err)
+            }
+
+
+            childTable ? params.related = true : params.related = false
+            
+            console.log(params)
+
 
         } else {
             res.status(400).send({
@@ -345,7 +342,7 @@ app.put("/", (req, res) => {
         }
 
         connection.query(
-            ('UPDATE `' + params.table.name + '` SET `' + params.table.relations[params.column].nameInParent + "` = " + "(SELECT " + childTable.table + '.Id FROM '+ childTable.table + ' WHERE ' + childTable.table + '.' + childTable.columnName +  " = '" + params.value + "')" + ' WHERE `' + params.table.name + '`.`Id` = ' + params.Id)
+            ('UPDATE `' + params.table.name + '` SET `' + (params.related ? ( params.table.relations[params.column].nameInParent) : params.column) + "` = " + (params.related ? ("(SELECT " + childTable.table + '.Id FROM '+ childTable.table + ' WHERE ' + childTable.table + '.' + childTable.columnName + " = '" + params.value + "') " ) : '' +  " '" + params.value + "'") + ' WHERE `' + params.table.name + '`.`Id` = ' + params.Id)
             , (err, rows) => {
             console.log(err);
             if(err) res.status('400');
