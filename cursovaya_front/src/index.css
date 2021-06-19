@@ -19,6 +19,7 @@ body {
 .Header {
   height: 55px;
   background: #96B5DB;
+
 }
 
 .Header .container {
@@ -34,6 +35,11 @@ body {
   justify-content: space-between;
   width: 450px;
   padding-right: 70px;
+}
+
+.menu_link_more {
+  position: relative;
+  cursor: pointer
 }
 
 .menu_link, .menu_link_more {
@@ -116,4 +122,22 @@ tr:first-child {
   bottom: 0;
   right: 0;
   width: 150px;
+}
+
+.dropDownMenu {
+  padding-top: 20px;
+  width: 180px;
+  height: 200px;
+  background: #fff;
+  position: absolute;
+  right: -30px;
+  top: 40px;
+  border: 1px solid #000
+}
+
+.dropDownMenu a{
+  margin-left: 15px;
+  color: #000;
+  margin-top: 7px;
+  display: block;
 }

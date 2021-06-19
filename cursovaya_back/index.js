@@ -44,11 +44,42 @@ const TABLE_COLUMNS = {
         relations: {Imya_Zakazchika: {table: 'Zakazchik', columnName: 'Imya_Zakazchika', nameInParent: 'Zakazchik'}, Nazvanie_Mesyaca: {table: 'Mesyci', columnName:'Nazvanie_Mesyaca', nameInParent: 'Mesyac_Arendi'}, Nazvanie_Tipa: {table: 'Tip_Reklami', columnName:'Nazvanie_Tipa', nameInParent: 'Tip_Reklami'}, Reklamnaya_Konstrukciya: {table: 'Info_o_Reklamnoj_Konstrukcii', columnName:'Id', nameInParent: 'Reklamnaya_Konstrukciya'}},
         name: 'zakaz'
     },
+    priznaki_konstrukcii:{
+        columns:['id' ,'id_konstrukcii', 'id_priznaka'],
+        query: 'SELECT Priznaki_Konstrukcii.Id, Priznaki.nazvanie_priznaka, Info_o_Reklamnoj_Konstrukcii.Id FROM Priznaki_Konstrukcii INNER JOIN Priznaki ON Priznaki_Konstrukcii.id_priznaka = Priznaki.Id INNER JOIN Info_o_Reklamnoj_Konstrukcii ON Priznaki_Konstrukcii.id_konstrukcii = Info_o_Reklamnoj_Konstrukcii.Id ',
+        name: 'priznaki_konstrukcii'
+    },
     zakazchik:{
         columns:['id' ,'Imya_Zakazchika', 'Nazvanie_Companii'],
         query: 'SELECT Zakazchik.Id, Zakazchik.Imya_Zakazchika, Zakazchik.Nazvanie_Companii FROM Zakazchik',
         name: 'zakazchik'
-    }
+    },
+    lokacia:{
+        columns:['id' ,'Adres'],
+        query: 'SELECT Locacia.Id, Locacia.Adres FROM Locacia',
+        name: 'lokacia'
+    },
+    mesyci:{
+        columns:['id' ,'Nazvanie_Mesyaca'],
+        query: 'SELECT Mesyci.Id, Mesyci.Nazvanie_Mesyaca FROM Mesyci',
+        name: 'mesyci'
+    },
+    priznaki:{
+        columns:['id' ,'nazvanie_priznaka'],
+        query: 'SELECT Priznaki.Id, Priznaki.nazvanie_priznaka FROM Priznaki',
+        name: 'priznaki'
+    },
+    storona:{
+        columns:['id' ,'Storona'],
+        query: 'SELECT Storona.Id, Storona.Storona FROM Storona',
+        name: 'storona'
+    },
+    tip_reklami:{
+        columns:['id' ,'Nazvanie_Tipa'],
+        query: 'SELECT Tip_Reklami.Id, Tip_Reklami.Nazvanie_Tipa FROM Tip_Reklami',
+        name: 'tip_reklami'
+    },
+
 }
 
 

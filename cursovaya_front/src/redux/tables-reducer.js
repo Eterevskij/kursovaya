@@ -88,7 +88,108 @@ const tablesInfo =  [{
         },
     }
 },
+{
+    path:'lokacia',
+    title:'Локация',
+    columns:{
+        id:{
+            nameInDB: 'Id',
+            columnName: 'id',
+            editType: 'no'
+        },
+        Adres:{
+            nameInDB: 'Adres',
+            columnName: 'Адрес',
+            editType: 'text'
+        }
+    }
+},
+{
+    path:'mesyci',
+    title:'Месяцы',
+    columns:{
+        id:{
+            nameInDB: 'Id',
+            columnName: 'id',
+            editType: 'no'
+        },
+        Nazvanie_Mesyaca:{
+            nameInDB: 'Nazvanie_Mesyaca',
+            columnName: 'Название',
+            editType: 'text'
+        }
+    }
+},
+{
+    path:'storona',
+    title:'Сторона',
+    columns:{
+        id:{
+            nameInDB: 'Id',
+            columnName: 'id',
+            editType: 'no'
+        },
+        Storona:{
+            nameInDB: 'Storona',
+            columnName: 'Сторона',
+            editType: 'text'
+        }
+    }
+},
+{
+    path:'priznaki',
+    title:'Признаки',
+    columns:{
+        id:{
+            nameInDB: 'Id',
+            columnName: 'id',
+            editType: 'no'
+        },
+        nazvanie_priznaka:{
+            nameInDB: 'nazvanie_priznaka',
+            columnName: 'Название',
+            editType: 'text'
+        }
+    }
+},
+{
+    path:'priznaki_konstrukcii',
+    title:'Признаки конструкции',
+    columns:{
+        id:{
+            nameInDB: 'Id',
+            columnName: 'id',
+            editType: 'no'
+        },
+        id_konstrukcii:{
+            nameInDB: 'id',
+            columnName: 'Конструкция',
+            editType: 'select'
+        },
+        id_priznaka:{
+            nameInDB: 'nazvanie_priznaka',
+            columnName: 'Признак',
+            editType: 'select'
+        }
+    }
+},
 
+{
+    path:'tip_reklami',
+    title:'Тип рекламы',
+    columns:{
+        id:{
+            nameInDB: 'Id',
+            columnName: 'id',
+            editType: 'no'
+        },
+        Nazvanie_Tipa:{
+            nameInDB: 'Nazvanie_Tipa',
+            columnName: 'Тип',
+            editType: 'text'
+        }
+    }
+},
 ]
 
 let initialState = {
@@ -121,10 +222,11 @@ const tablesReducer = (state = initialState, action) => {
 
             case EDIT_FIELD: 
                 return {...state, table: state.table.map((entity)=>{
+                    debugger
                     if(entity.Id === action.id) {
-                        return {...state, table: state.table}
+                        return {...entity, [action.field] : action.value}
                     } else {
-                        return {...state, table: state.table}
+                        return  entity
                     }
 
                 })}
